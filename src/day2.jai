@@ -2,12 +2,11 @@
 #import "String";
 #import "utils";
 
-Part: Parts;
 run :: () {
-	
-	Part = .PART1;
-	print("Day2 Part1 Sample: %\n", run_main("sample"));
-	print("Day2 Part1       : %\n", run_main());
+	print("Day2 Part1 Sample: %\n", run_part1("sample"));
+	print("Day2 Part1       : %\n", run_part1());
+	print("Day2 Part2 Sample: %\n", run_part2("sample"));
+	print("Day2 Part1       : %\n", run_part2());
 }
 
 validate_game :: (line: string) -> bool, int {
@@ -47,7 +46,7 @@ validate_game :: (line: string) -> bool, int {
 }
 
 sum: int;
-run_main :: (suffix := "") -> int {
+run_part1 :: (suffix := "") -> int {
 	
 	sum = 0;
 	sum_lines :: (line: string) {
@@ -60,4 +59,55 @@ run_main :: (suffix := "") -> int {
 	process_file("day2", sum_lines, suffix);
 
 	return sum;
+}
+
+determine_power :: (line: string) -> int {
+
+	min_red := 0;
+	min_blue := 0;
+	min_green := 0;
+
+	start_index := find_index_from_left(line,":");
+	while(true) {
+		semicolon_index := find_index_from_left(line,";",start_index+1);
+		if semicolon_index == -1 { semicolon_index = line.count; }
+		draw_details := slice(line,start_index+2,semicolon_index-start_index-2);
+		cubes := split(draw_details,",");
+		for *cubes { 
+			<<it = trim(<<it);
+			cube_count: int;
+			if scan2(<<it, "% red", *cube_count) {
+				if min_red < cube_count {
+					min_red = cube_count;
+				}
+			}
+			if scan2(<<it, "% blue", *cube_count) {
+				if min_blue < cube_count {
+					min_blue = cube_count;
+				}
+			}
+			if scan2(<<it, "% green", *cube_count) {
+				if min_green < cube_count {
+					min_green = cube_count;
+				}
+			}
+		}
+		if semicolon_index == line.count break;
+		start_index = semicolon_index;
+	}
+
+	return min_red*min_blue*min_green;
+}
+
+power: int;
+run_part2 :: (suffix := "") -> int {
+	
+	power = 0;
+	sum_lines :: (line: string) {
+		power += determine_power(line);
+	}
+
+	process_file("day2", sum_lines, suffix);
+
+	return power;
 }
