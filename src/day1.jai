@@ -18,19 +18,15 @@ run :: () {
 	digits[9] = "nine";
 
 	Part = .PART1;
-	print("Day1 Part1 Sample: %\n", run_sample());
+	print("Day1 Part1 Sample: %\n", run_main("sample"));
 	print("Day1 Part1       : %\n", run_main());
 	Part = .PART2;
-	print("Day1 Part2 Sample: %\n", run_sample());
+	print("Day1 Part2 Sample: %\n", run_main("part2_sample"));
 	print("Day1 Part2       : %\n", run_main());
 }
 
-
-
 get_value :: (line: string) -> int {
-
 	get_digit :: (line: string, index: int) -> int {
-
 		test_digit :: (line: string, index: int, digit: int) -> bool {
 			if index <= line.count-digits[digit].count {
 				for 1..digits[digit].count-1 {
@@ -88,33 +84,15 @@ get_value :: (line: string) -> int {
 	return value;
 }
 
-sample_sum: int;
-run_sample :: () -> int {
-	
-	sample_sum = 0;
-	sum_sample_lines :: (line: string) {
-		sample_sum += get_value(line);
-	}
-
-	if (Part == .PART1) {
-		process_file("day1", sum_sample_lines, "sample");
-	}
-	else {
-		process_file("day1", sum_sample_lines, "part2_sample");
-	}
-
-	return sample_sum;
-}
-
 sum: int;
-run_main :: () -> int {
+run_main :: (suffix := "") -> int {
 	
 	sum = 0;
 	sum_lines :: (line: string) {
 		sum += get_value(line);
 	}
 
-	process_file("day1", sum_lines);
+	process_file("day1", sum_lines, suffix);
 
 	return sum;
 }
