@@ -2,112 +2,93 @@
 #import "String";
 #import "utils";
 
+CUBE_RED :: 0;
+CUBE_BLUE :: 1;
+CUBE_GREEN :: 2;
+
+Part: Parts;
 run :: () {
-	print("Day2 Part1 Sample: %\n", run_part1("sample"));
-	print("Day2 Part1       : %\n", run_part1());
-	print("Day2 Part2 Sample: %\n", run_part2("sample"));
-	print("Day2 Part1       : %\n", run_part2());
+	Part = .PART1;
+	print("Day2 Part1 Sample: %\n", run_main("sample"));
+	print("Day2 Part1       : %\n", run_main());
+	Part = .PART2;
+	print("Day2 Part2 Sample: %\n", run_main("sample"));
+	print("Day2 Part1       : %\n", run_main());
 }
 
-validate_game :: (line: string) -> bool, int {
+min_cube_counts: [3] int;
+score_game :: (line: string) -> int {
+
+	for *min_cube_counts { <<it = 0; }
 
 	colon_index := find_index_from_left(line,":");
 
-	line_to_parse := slice(line,0,colon_index);
+	process_cubes_part1 :: (cube: string) -> bool {
+		cube_count: int;
+		if scan2(cube, "% red", *cube_count) {
+			return cube_count <= 12;
+		}
+		else if scan2(cube, "% blue", *cube_count) {
+			return cube_count <= 14;
+		}
+		else { 
+			assert(scan2(cube, "% green", *cube_count));
+			return cube_count <= 13;
+		}
+	}
 
-	game_id: int;
-	assert(scan2(line_to_parse, "Game %", *game_id));
+	process_cubes_part2 :: (cube: string) -> bool {
+		cube_count: int;
+		if scan2(cube, "% red", *cube_count) {
+			min_cube_counts[CUBE_RED] = max(min_cube_counts[CUBE_RED],cube_count);
+		}
+		else if scan2(cube, "% blue", *cube_count) {
+			min_cube_counts[CUBE_BLUE] = max(min_cube_counts[CUBE_BLUE],cube_count);
+		}
+		else {
+			assert(scan2(cube, "% green", *cube_count));
+			min_cube_counts[CUBE_GREEN] = max(min_cube_counts[CUBE_GREEN],cube_count);
+		}
+		return true;
+	}
+
+	process_cubes := ifx Part == .PART1 process_cubes_part1 else process_cubes_part2;
 
 	start_index := colon_index;
-	while(true) {
+	while true {
 		semicolon_index := find_index_from_left(line,";",start_index+1);
 		if semicolon_index == -1 { semicolon_index = line.count; }
 		draw_details := slice(line,start_index+2,semicolon_index-start_index-2);
 		cubes := split(draw_details,",");
-		for *cubes { 
-			<<it = trim(<<it);
-			cube_count: int;
-			if scan2(<<it, "% red", *cube_count) {
-				if cube_count > 12 return false, -1;
-			}
-			if scan2(<<it, "% blue", *cube_count) {
-				if cube_count > 14 return false, -1;
-			}
-			if scan2(<<it, "% green", *cube_count) {
-				if cube_count > 13 return false, -1;
-			}
-
-		}
-		if semicolon_index == line.count break;
-		start_index = semicolon_index;
-	}
-
-	return true, game_id;
-}
-
-sum: int;
-run_part1 :: (suffix := "") -> int {
-	
-	sum = 0;
-	sum_lines :: (line: string) {
-		is_valid_game, game_id := validate_game(line);
-		if is_valid_game {
-			sum += game_id;
-		}
-	}
-
-	process_file("day2", sum_lines, suffix);
-
-	return sum;
-}
-
-determine_power :: (line: string) -> int {
-
-	min_red := 0;
-	min_blue := 0;
-	min_green := 0;
-
-	start_index := find_index_from_left(line,":");
-	while(true) {
-		semicolon_index := find_index_from_left(line,";",start_index+1);
-		if semicolon_index == -1 { semicolon_index = line.count; }
-		draw_details := slice(line,start_index+2,semicolon_index-start_index-2);
-		cubes := split(draw_details,",");
-		for *cubes { 
-			<<it = trim(<<it);
-			cube_count: int;
-			if scan2(<<it, "% red", *cube_count) {
-				if min_red < cube_count {
-					min_red = cube_count;
-				}
-			}
-			if scan2(<<it, "% blue", *cube_count) {
-				if min_blue < cube_count {
-					min_blue = cube_count;
-				}
-			}
-			if scan2(<<it, "% green", *cube_count) {
-				if min_green < cube_count {
-					min_green = cube_count;
-				}
+		for cubes { 
+			if !process_cubes(trim(it)) {
+				return 0;
 			}
 		}
 		if semicolon_index == line.count break;
 		start_index = semicolon_index;
 	}
 
-	return min_red*min_blue*min_green;
+	if (Part == .PART1) {
+		line_to_parse := slice(line,0,colon_index);
+		game_id: int;
+		assert(scan2(line_to_parse, "Game %", *game_id));
+		return game_id;
+	}
+	else {
+		return min_cube_counts[CUBE_RED] * min_cube_counts[CUBE_BLUE] * min_cube_counts[CUBE_GREEN];
+	}
 }
 
-power: int;
-run_part2 :: (suffix := "") -> int {
+score: int;
+run_main :: (suffix := "") -> int {
 	
-	power = 0;
-	sum_lines :: (line: string) {
-		power += determine_power(line);
+	score = 0;
+	sum_scores :: (line: string) {
+		score += score_game(line);
 	}
 
-	process_file("day2", sum_lines, suffix);
+	process_file("day2", sum_scores, suffix);
 
-	return power;
+	return score;
 }
