@@ -3,12 +3,10 @@
 #import "utils";
 
 digits: [10] string;
-numbers: [10] string;
 
-PART1 := true;
+Part: Parts;
 run :: () {
 	
-	digits[0] = "";
 	digits[1] = "one";
 	digits[2] = "two";
 	digits[3] = "three";
@@ -19,13 +17,10 @@ run :: () {
 	digits[8] = "eight";
 	digits[9] = "nine";
 
-	for 0..9 {
-		numbers[it] = tprint("%",it);
-	}
-
+	Part = .PART1;
 	print("Day1 Part1 Sample: %\n", run_sample());
 	print("Day1 Part1       : %\n", run_main());
-	PART1 = false;
+	Part = .PART2;
 	print("Day1 Part2 Sample: %\n", run_sample());
 	print("Day1 Part2       : %\n", run_main());
 }
@@ -34,60 +29,60 @@ run :: () {
 
 get_value :: (line: string) -> int {
 
+	get_digit :: (line: string, index: int) -> int {
+
+		test_digit :: (line: string, index: int, digit: int) -> bool {
+			if index <= line.count-digits[digit].count {
+				for 1..digits[digit].count-1 {
+					if line[index+it] != digits[digit][it] {
+						return false;
+					}
+				}
+				return true;
+			}
+			return false;
+		}
+
+		if is_digit(line[index]) {
+			return (line[index] - #char "0");
+		}
+		else if Part == .PART2 {
+			if line[index] == {
+				case #char "o";
+					if test_digit(line, index, 1) return 1;
+				case #char "t";
+					if test_digit(line, index, 2) return 2;
+					if test_digit(line, index, 3) return 3;
+				case #char "f";
+					if test_digit(line, index, 4) return 4;
+					if test_digit(line, index, 5) return 5;
+				case #char "s";
+					if test_digit(line, index, 6) return 6;
+					if test_digit(line, index, 7) return 7;
+				case #char "e";
+					if test_digit(line, index, 8) return 8;
+				case #char "n";
+					if test_digit(line, index, 9) return 9;
+			}
+		}
+		return -1;
+	}
+
 	value := 0;
 
-	if (PART1)
-	{
-		for 0..line.count-1 {
-			if is_digit(line[it]) {
-				value += 10 * (line[it] - #char "0");
-				break;
-			}
-		}
-		for < line.count-1..0 {
-			if is_digit(line[it]) {
-				value += (line[it] - #char "0");
-				break;
-			}
+	for 0..line.count-1 {
+		digit := get_digit(line,it);
+		if digit != -1 {
+			value += 10 * digit;
+			break;
 		}
 	}
-	else {
-		firstDigit := -1;
-		secondDigit := -1;
-		firstDigitIndex := max_of_type(int);
-		secondDigitIndex := -1;
-
-		for digits {
-			foundDigitIndex := find_in_string(line,it);
-			if foundDigitIndex != -1 {
-				if foundDigitIndex < firstDigitIndex {
-					firstDigit = it_index;
-					firstDigitIndex = foundDigitIndex;
-				}
-				foundDigitIndex = find_in_string(line,it,true);
-				if foundDigitIndex > secondDigitIndex {
-					secondDigit = it_index;
-					secondDigitIndex = foundDigitIndex;
-				}
-			}
+	for < line.count-1..0 {
+		digit := get_digit(line,it);
+		if digit != -1 {
+			value += digit;
+			break;
 		}
-
-		for numbers {
-			foundDigitIndex := find_in_string(line,it);
-			if foundDigitIndex != -1 {
-				if foundDigitIndex < firstDigitIndex {
-					firstDigit = it_index;
-					firstDigitIndex = foundDigitIndex;
-				}
-				foundDigitIndex = find_in_string(line,it,true);
-				if foundDigitIndex > secondDigitIndex {
-					secondDigit = it_index;
-					secondDigitIndex = foundDigitIndex;
-				}
-			}
-		}
-
-		value = firstDigit * 10 + secondDigit;
 	}
 
 	return value;
@@ -101,7 +96,7 @@ run_sample :: () -> int {
 		sample_sum += get_value(line);
 	}
 
-	if (PART1) {
+	if (Part == .PART1) {
 		process_file("day1", sum_sample_lines, "sample");
 	}
 	else {

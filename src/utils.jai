@@ -3,6 +3,11 @@
 #import "System";
 #import "Text_File_Handler";
 
+Parts :: enum u8 {
+	PART1;
+	PART2;
+}
+
 get_input_file_handler :: (day: string, suffix := "") -> Text_File_Handler
 {
 	handler: Text_File_Handler;
