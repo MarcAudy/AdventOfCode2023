@@ -12,6 +12,8 @@ get_input_file_handler :: (day: string, suffix := "") -> Text_File_Handler
 {
 	handler: Text_File_Handler;
 	handler.do_version_number = false;
+	handler.strip_comments_from_ends_of_lines = false;
+	handler.auto_skip_blank_lines = false;
 
 	found, exe_path, exe_name := split_from_right(get_path_of_running_executable(), #char "/");
     if !found {

@@ -2,6 +2,7 @@
 Utils :: #import "utils";
 Day1 :: #import "day1";
 Day2 :: #import "day2";
+Day3 :: #import "day3";
 
 main ::() {
 
@@ -13,5 +14,6 @@ main ::() {
         log("% ms elapsed.\n", elapsed * 1000);
     }
 	//Day1.run();
-	Day2.run();
+	//Day2.run();
+	Day3.run();
 }
