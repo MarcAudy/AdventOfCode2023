@@ -1,4 +1,5 @@
 #import "Basic";
+#import "Hash";
 #import "String";
 #import "System";
 #import "Text_File_Handler";
@@ -6,6 +7,20 @@
 Parts :: enum u8 {
 	PART1;
 	PART2;
+}
+
+Point :: struct {
+	x: int;
+	y: int;
+}
+operator == :: (a: Point, b: Point) -> bool {
+	return a.x == b.x && a.y == b.y;
+}
+compare_points :: (a: Point, b: Point) -> bool {
+	return a == b;
+}
+point_hash :: (p: Point) -> u32 {
+	return sdbm_hash(*p, size_of(Point));
 }
 
 get_input_file_handler :: (day: string, suffix := "") -> Text_File_Handler
