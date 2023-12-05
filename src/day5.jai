@@ -4,18 +4,22 @@
 #import "String";
 #import "utils";
 
-Part: Parts;
 run :: () {
-	Part = .PART1;
-	//print("Day5 Part1 Sample: %\n", run_main("sample"));
-	//print("Day5 Part1       : %\n", run_main());
-	Part = .PART2;
-	print("Day5 Part2 Sample: %\n", run_main("sample"));
-	print("Day5 Part2       : %\n", run_main());
+	print("Day5 Part1 Sample: %\n", run_part1("sample"));
+	print("Day5 Part1       : %\n", run_part1());
+	print("Day5 Part2 Sample: %\n", run_part2("sample"));
+	print("Day5 Part2       : %\n", run_part2());
+}
+
+AlmanacEntry :: struct {
+	sourceStart: int;
+	destStart: int;
+	rangeLength: int;
 }
 
 file_lines: [..] string;
-run_main :: (suffix := "") -> int {
+
+parse_data :: (suffix := "") -> [..] int, [7] [..]AlmanacEntry {
 	
 	array_reset(*file_lines);
 
@@ -35,12 +39,6 @@ run_main :: (suffix := "") -> int {
 		}
 	}
 
-	AlmanacEntry :: struct {
-		sourceStart: int;
-		destStart: int;
-		rangeLength: int;
-	}
-
 	maps: [7] [..]AlmanacEntry;
 
 	map_index := 0;
@@ -58,6 +56,13 @@ run_main :: (suffix := "") -> int {
 		line_index += 1;
 	}
 
+	return seeds, maps;
+}
+
+run_part1 :: (suffix := "") -> int {
+
+	seeds, maps := parse_data(suffix);
+
 	map_value :: (value: int, entries: [..]AlmanacEntry) -> int {
 		for entry: entries {
 			using entry;
@@ -67,6 +72,22 @@ run_main :: (suffix := "") -> int {
 		}
 		return value;
 	}
+
+	smallest_location := S64_MAX;
+	for seed: seeds {
+		mapped_value := seed;
+		for map: maps {
+			mapped_value = map_value(mapped_value, map);
+		}
+		smallest_location = min(mapped_value,smallest_location);
+	}
+
+	return smallest_location;
+}
+
+run_part2 :: (suffix := "") -> int {
+
+	seeds, maps := parse_data(suffix);
 
 	Range :: struct {
 		start: int;
