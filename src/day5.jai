@@ -4,9 +4,14 @@
 #import "String";
 #import "utils";
 
+Part: Parts;
 run :: () {
+	Part = .PART1;
 	print("Day5 Part1 Sample: %\n", run_main("sample"));
 	print("Day5 Part1       : %\n", run_main());
+	Part = .PART2;
+	print("Day5 Part2 Sample: %\n", run_main("sample"));
+	print("Day5 Part2       : %\n", run_main());
 }
 
 file_lines: [..] string;
@@ -64,12 +69,17 @@ run_main :: (suffix := "") -> int {
 	}
 
 	smallest_location := S64_MAX;
-	for seed: seeds {
-		mapped_value := seed;
-		for map: maps {
-			mapped_value = map_value(mapped_value, map);
+	seed_index := 0;
+	while seed_index < seeds.count {
+		seed_range_end := seeds[seed_index] + ifx Part == .PART1 0 else seeds[seed_index+1];
+		for seed: seeds[seed_index]..seed_range_end {
+			mapped_value := seed;
+			for map: maps {
+				mapped_value = map_value(mapped_value, map);
+			}
+			smallest_location = min(mapped_value,smallest_location);
 		}
-		smallest_location = min(mapped_value,smallest_location);
+		seed_index += ifx Part == .PART1 1 else 2;
 	}
 
 	return smallest_location;
