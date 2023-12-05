@@ -7,8 +7,8 @@
 Part: Parts;
 run :: () {
 	Part = .PART1;
-	print("Day5 Part1 Sample: %\n", run_main("sample"));
-	print("Day5 Part1       : %\n", run_main());
+	//print("Day5 Part1 Sample: %\n", run_main("sample"));
+	//print("Day5 Part1       : %\n", run_main());
 	Part = .PART2;
 	print("Day5 Part2 Sample: %\n", run_main("sample"));
 	print("Day5 Part2       : %\n", run_main());
@@ -68,18 +68,61 @@ run_main :: (suffix := "") -> int {
 		return value;
 	}
 
-	smallest_location := S64_MAX;
+	Range :: struct {
+		start: int;
+		length: int;
+	}
+
+	map_range :: (range_in: Range, entries: [..]AlmanacEntry) -> [..]Range {
+		ranges: [..]Range;
+		
+		range := range_in;
+
+		found := true;
+		while outer := found {
+			found = false;
+			for entry: entries {
+				using entry;
+				if range.start >= sourceStart && range.start < sourceStart + rangeLength {
+					newRangeStart := range.start - sourceStart + destStart;
+					newRangeLength := min(sourceStart + rangeLength - range.start, range.length);
+					array_add(*ranges,Range.{newRangeStart,newRangeLength});
+					found = true;
+					range.start += newRangeLength;
+					range.length -= newRangeLength;
+					if range.length == 0 {
+						break outer;
+					}
+				}
+			}
+		}
+		if range.length > 0 {
+			array_add(*ranges,range);
+		}
+		return ranges;
+	}
+
+	seed_ranges: [..]Range;
 	seed_index := 0;
 	while seed_index < seeds.count {
-		seed_range_end := seeds[seed_index] + ifx Part == .PART1 0 else seeds[seed_index+1];
-		for seed: seeds[seed_index]..seed_range_end {
-			mapped_value := seed;
-			for map: maps {
-				mapped_value = map_value(mapped_value, map);
+		array_add(*seed_ranges,Range.{seeds[seed_index],seeds[seed_index+1]});
+		seed_index += 2;
+	}
+
+	ranges := seed_ranges;
+	for map: maps {
+		new_ranges: [..]Range;
+		for range: ranges {
+			for new_range: map_range(range, map) {
+				array_add(*new_ranges,new_range);
 			}
-			smallest_location = min(mapped_value,smallest_location);
 		}
-		seed_index += ifx Part == .PART1 1 else 2;
+		ranges = new_ranges;
+	}
+
+	smallest_location := S64_MAX;
+	for range: ranges {
+		smallest_location = min(range.start,smallest_location);
 	}
 
 	return smallest_location;
