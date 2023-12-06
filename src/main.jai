@@ -4,7 +4,8 @@ Utils :: #import "utils";
 //Day2 :: #import "day2";
 //Day3 :: #import "day3";
 //Day4 :: #import "day4";
-Day5 :: #import "day5";
+//Day5 :: #import "day5";
+Day6 :: #import "day6";
 
 main ::() {
 
@@ -19,5 +20,6 @@ main ::() {
 	//Day2.run();
 	//Day3.run();
 	//Day4.run();
-	Day5.run();
+	//Day5.run();
+	Day6.run();
 }
