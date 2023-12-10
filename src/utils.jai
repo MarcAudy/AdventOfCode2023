@@ -1,5 +1,6 @@
 #import "Basic";
 #import "Hash";
+#import "Hash_Table";
 #import "String";
 #import "System";
 #import "Text_File_Handler";
@@ -9,9 +10,18 @@ Parts :: enum u8 {
 	PART2;
 }
 
+print_table :: (table: Table) {
+	for v, n: table {
+		print("%: %\n",n,v);
+	}
+}
+
 Point :: struct {
 	x: int;
 	y: int;
+}
+operator + :: (a: Point, b: Point) -> Point {
+	return Point.{a.x+b.x,a.y+b.y};
 }
 operator == :: (a: Point, b: Point) -> bool {
 	return a.x == b.x && a.y == b.y;
