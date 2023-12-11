@@ -7,91 +7,61 @@
 #import "utils";
 
 part: Parts;
-expansion: int;
+expanded_size: int;
 run :: () {
 	part = .PART1;
-	expansion = 1;
+	expanded_size = 2;
 	print("Day11 Part1 Sample : %\n", run_main("sample"));
 	print("Day11 Part1        : %\n", run_main());
 	part = .PART2;
-	expansion = 9;
+	expanded_size = 10;
 	print("Day11 Part2 Sample : %\n", run_main("sample"));
-	expansion = 99;
+	expanded_size = 100;
 	print("Day11 Part2 Sample2: %\n", run_main("sample"));
-	expansion = 999999;
+	expanded_size = 1000000;
 	print("Day11 Part2        : %\n", run_main());
 }
 
 
+galaxies: [..]Point;
 universe: [..][..]int;
 columns_with_galaxies: [..]bool;
-
-print_universe :: () {
-	for y: 0..universe.count-1 {
-		for x: 0..universe[0].count-1 {
-			if universe[y][x] == -1
-				print("#");
-			else if universe[y][x] == 1
-				print(".");
-			else if universe[y][x] == expansion
-				print("@");
-		}
-		print("\n");
-	}
-}
+expanded_row: [..]int;
 
 run_main :: (suffix := "") -> int {
 	
+	array_reset(*galaxies);
 	array_reset(*universe);
 	array_reset(*columns_with_galaxies);
+	array_reset(*expanded_row);
 
 	process_lines :: (line: string) {
 		if columns_with_galaxies.count == 0 {
 			array_resize(*columns_with_galaxies,line.count);
+			array_reserve(*expanded_row,line.count);
+			for columns_with_galaxies {
+				array_add(*expanded_row,expanded_size);
+			}
 		}
 
 		row : [..]int;
 		has_galaxy := false;
 		for 0..line.count-1 {
+			array_add(*row,1);
 			if line[it] == #char "#" {
-				array_add(*row,-1);
 				has_galaxy = true;
 				columns_with_galaxies[it] = true;
-			}
-			else {
-				array_add(*row,1);
+				array_add(*galaxies,.{it,universe.count});
 			}
 		}
-		array_add(*universe, row);
-		if !has_galaxy {
-			if part == .PART1 {
-				array_add(*universe, row);
-			}
-			else {
-				expanded_row: [..]int;
-				for 0..line.count-1 {
-					array_add(*expanded_row,expansion);
-				}
-				array_add(*universe, expanded_row);
-			}
-		}
+		array_add(*universe, ifx has_galaxy row else expanded_row);
 	}
 	process_file("day11", process_lines, suffix);
 
-	for < column_index: columns_with_galaxies.count-1..0 {
-		if !columns_with_galaxies[column_index] {
+	for column_has_galaxy, column_index: columns_with_galaxies {
+		if !column_has_galaxy {
 			for universe {
-				array_insert_at(*it, ifx part == .PART1 1 else expansion, column_index);
-			}
-		}
-	}
-
-	galaxies: [..]Point;
-
-	for y: 0..universe.count-1 {
-		for x: 0..universe[0].count-1 {
-			if universe[y][x] == -1 {
-				array_add(*galaxies,.{x,y});
+				it[column_index] = expanded_size;
 			}
 		}
 	}
@@ -102,12 +72,11 @@ run_main :: (suffix := "") -> int {
 		g1 := galaxies[galaxy1_index];
 		for galaxy2_index: galaxy1_index+1..galaxies.count-1 {
 			g2 := galaxies[galaxy2_index];
-			dist := 0;
 			for x: min(g1.x,g2.x)+1..max(g1.x,g2.x) {
-				distances += abs(universe[g1.y][x]);
+				distances += universe[g1.y][x];
 			}
 			for y: min(g1.y,g2.y)+1..max(g1.y,g2.y) {
-				distances += abs(universe[y][g1.x]);
+				distances += universe[y][g1.x];
 			}
 		}
 	}
