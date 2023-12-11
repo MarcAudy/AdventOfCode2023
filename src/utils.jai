@@ -1,6 +1,7 @@
 #import "Basic";
 #import "Hash";
 #import "Hash_Table";
+#import "Math";
 #import "String";
 #import "System";
 #import "Text_File_Handler";
@@ -32,11 +33,16 @@ compare_points :: (a: Point, b: Point) -> bool {
 point_hash :: (p: Point) -> u32 {
 	return sdbm_hash(*p, size_of(Point));
 }
+dist_between :: (p1: Point, p2: Point) -> int {
+	return abs(p1.x-p2.x) + abs(p1.y-p2.y);
+}
+
 
 get_input_file_handler :: (day: string, suffix := "") -> Text_File_Handler
 {
 	handler: Text_File_Handler;
 	handler.do_version_number = false;
+	handler.comment_character = #char "~";
 	handler.strip_comments_from_ends_of_lines = false;
 	handler.auto_skip_blank_lines = false;
 
