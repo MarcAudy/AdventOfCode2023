@@ -25,9 +25,17 @@ Tile :: enum {
 
 grid: [..][..]Tile;
 
+hash_grid :: () -> u32 {
+	hash: u32 = 0;
+	for grid {
+		hash ^= get_hash(it);
+	}
+	return hash;
+}
+
 print_grid :: () {
 	for y: 0..grid.count-1 {
-		for x: 0..grid[0].count {
+		for x: 0..grid[0].count-1 {
 			if grid[y][x] == {
 				case .EMPTY; print(".");
 				case .STATIC; print("#");
@@ -38,10 +46,12 @@ print_grid :: () {
 	}
 }
 
-
+seen_states: Table(u32, int);
 run_main :: (suffix := "") -> int {
 	
 	array_reset(*grid);
+	table_reset(*seen_states);
+
 	process_line :: (line: string) {
 		row: [..]Tile;
 		for cast([]u8) line {
@@ -58,28 +68,98 @@ run_main :: (suffix := "") -> int {
 
 	//print_grid();
 
-	for y: 1..grid.count-1 {
-		for x: 0..grid[0].count {
-			if grid[y][x] == .MOVABLE {
-				for < y-1..0 {
-					if grid[it][x] == .EMPTY {
-						grid[it][x] = .MOVABLE;
-						grid[it+1][x] = .EMPTY;
-					}
-					else {
-						break;
+	iter := 0;
+	found_cycle := false;
+	while iter < 1000000000 {
+
+		// NORTH
+		for y: 1..grid.count-1 {
+			for x: 0..grid[0].count-1 {
+				if grid[y][x] == .MOVABLE {
+					for < y-1..0 {
+						if grid[it][x] == .EMPTY {
+							grid[it][x] = .MOVABLE;
+							grid[it+1][x] = .EMPTY;
+						}
+						else {
+							break;
+						}
 					}
 				}
 			}
 		}
-	}
 	
-	//print("\n");
-	//print_grid();
+		// WEST
+		for x: 1..grid[0].count-1 {
+			for y: 0..grid.count-1 {
+				if grid[y][x] == .MOVABLE {
+					for < x-1..0 {
+						if grid[y][it] == .EMPTY {
+							grid[y][it] = .MOVABLE;
+							grid[y][it+1] = .EMPTY;
+						}
+						else {
+							break;
+						}
+					}
+				}
+			}
+		}
+	
+		// SOUTH
+		for < y: grid.count-2..0 {
+			for x: 0..grid[0].count-1 {
+				if grid[y][x] == .MOVABLE {
+					for y+1..grid.count-1 {
+						if grid[it][x] == .EMPTY {
+							grid[it][x] = .MOVABLE;
+							grid[it-1][x] = .EMPTY;
+						}
+						else {
+							break;
+						}
+					}
+				}
+			}
+		}
+	
+		// EAST
+		for < x: grid[0].count-2..0 {
+			for y: 0..grid.count-1 {
+				if grid[y][x] == .MOVABLE {
+					for x+1..grid[0].count-1 {
+						if grid[y][it] == .EMPTY {
+							grid[y][it] = .MOVABLE;
+							grid[y][it-1] = .EMPTY;
+						}
+						else {
+							break;
+						}
+					}
+				}
+			}
+		}
+
+		iter += 1;
+		if (!found_cycle) {
+			entry, new := find_or_add(*seen_states, hash_grid());
+			if new {
+				<<entry = iter;
+			}
+			else {
+				print("cycle at % of %\n",iter,<<entry);
+				found_cycle = true;
+				num := (1000000000 - <<entry);
+				period := iter - <<entry;
+				iter = 1000000000 - (num % period);
+				print("%\n",iter);
+			}
+		}
+	}
 
 	sum := 0;
 	for y: 0..grid.count-1 {
-		for x: 0..grid[0].count {
+		for x: 0..grid[0].count-1 {
 			if grid[y][x] == .MOVABLE {
 				sum += grid.count-y;
 			}
