@@ -10,11 +10,11 @@
 part: Parts;
 run :: () {
 	part = .PART1;
-	print("Day12 Part1 Sample : %\n", run_main("sample"));
-	print("Day12 Part1        : %\n", run_main());
+	print("Day14 Part1 Sample : %\n", run_main("sample"));
+	print("Day14 Part1        : %\n", run_main());
 	part = .PART2;
-	//print("Day12 Part2 Sample : %\n", run_main("sample"));
-	//print("Day12 Part2        : %\n", run_main());
+	print("Day14 Part2 Sample : %\n", run_main("sample"));
+	print("Day14 Part2        : %\n", run_main());
 }
 
 Tile :: enum {
@@ -31,19 +31,6 @@ hash_grid :: () -> u32 {
 		hash ^= get_hash(it);
 	}
 	return hash;
-}
-
-print_grid :: () {
-	for y: 0..grid.count-1 {
-		for x: 0..grid[0].count-1 {
-			if grid[y][x] == {
-				case .EMPTY; print(".");
-				case .STATIC; print("#");
-				case .MOVABLE; print("O");
-			}
-		}
-		print("\n");
-	}
 }
 
 seen_states: Table(u32, int);
@@ -66,11 +53,10 @@ run_main :: (suffix := "") -> int {
 	}
 	process_file("day14", process_line, suffix);
 
-	//print_grid();
-
+	iter_target :: 1000000000;
 	iter := 0;
 	found_cycle := false;
-	while iter < 1000000000 {
+	while iter < iter_target {
 
 		// NORTH
 		for y: 1..grid.count-1 {
@@ -88,6 +74,7 @@ run_main :: (suffix := "") -> int {
 				}
 			}
 		}
+		if part == .PART1 break;
 	
 		// WEST
 		for x: 1..grid[0].count-1 {
@@ -147,12 +134,8 @@ run_main :: (suffix := "") -> int {
 				<<entry = iter;
 			}
 			else {
-				print("cycle at % of %\n",iter,<<entry);
 				found_cycle = true;
-				num := (1000000000 - <<entry);
-				period := iter - <<entry;
-				iter = 1000000000 - (num % period);
-				print("%\n",iter);
+				iter = iter_target - ((iter_target - <<entry) % (iter - <<entry));
 			}
 		}
 	}
