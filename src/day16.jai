@@ -7,14 +7,13 @@
 #import "String";
 #import "utils";
 
-part: Parts;
 run :: () {
-	part = .PART1;
-	print("Day16 Part1 Sample : %\n", run_main("sample"));
-	print("Day16 Part1        : %\n", run_main());
-	part = .PART2;
-	//print("Day16 Part2 Sample : %\n", run_main("sample"));
-	//print("Day16 Part2        : %\n", run_main());
+	sample_part1, sample_part2 := run_main("sample");
+	part1, part2               := run_main();
+	print("Day15 Part1 Sample: %\n", sample_part1);
+	print("Day15 Part1       : %\n", part1);
+	print("Day15 Part2 Sample: %\n", sample_part2);
+	print("Day15 Part2       : %\n", part2);
 }
 
 Tile :: enum {
@@ -46,27 +45,10 @@ beam_hash :: (b: Beam) -> u32 {
 	return sdbm_hash(*b, size_of(Beam));	
 }
 
-grid: [..][..]Tile;
-run_main :: (suffix := "") -> int {
-	
-	array_reset(*grid);
-	process_line :: (line: string) {
-		row: [..]Tile;
-		for cast([]u8) line {
-			if it == {
-				case #char "."; array_add(*row, .EMPTY);
-				case #char "-"; array_add(*row, .HORIZONTAL);
-				case #char "|"; array_add(*row, .VERTICAL);
-				case #char "/"; array_add(*row, .SLASH);
-				case #char "\\"; array_add(*row, .BACKSLASH);
-			}
-		}
-		array_add(*grid, row);
-	}
-	process_file("day16", process_line, suffix);
+run_simulation :: (start_beam: Beam) -> int {
 
 	beams: [..]Beam;
-	array_add(*beams,.{.{-1,0},.RIGHT});
+	array_add(*beams,start_beam);
 
 	seen_beams: Table(Beam, bool, beam_hash, compare_beams);
 
@@ -79,7 +61,6 @@ run_main :: (suffix := "") -> int {
 	}
 
 	while beams.count > 0 {
-
 		for < beam_index: beams.count-1..0 {
 
 			_, new := find_or_add(*seen_beams, beams[beam_index]);
@@ -150,4 +131,43 @@ run_main :: (suffix := "") -> int {
 	}
 
 	return energized_count;
+}
+
+grid: [..][..]Tile;
+run_main :: (suffix := "") -> int, int {
+	
+	array_reset(*grid);
+	process_line :: (line: string) {
+		row: [..]Tile;
+		for cast([]u8) line {
+			if it == {
+				case #char "."; array_add(*row, .EMPTY);
+				case #char "-"; array_add(*row, .HORIZONTAL);
+				case #char "|"; array_add(*row, .VERTICAL);
+				case #char "/"; array_add(*row, .SLASH);
+				case #char "\\"; array_add(*row, .BACKSLASH);
+			}
+		}
+		array_add(*grid, row);
+	}
+	process_file("day16", process_line, suffix);
+
+	part1_energized: int;
+	part2_max_energized := 0;
+
+	for y: 0..grid.count-1 {
+		result := run_simulation(.{.{-1,y},.RIGHT});
+		if y == 0 { part1_energized = result; }
+		if result > part2_max_energized { part2_max_energized = result; }
+		result = run_simulation(.{.{grid[0].count,y},.LEFT});
+		if result > part2_max_energized { part2_max_energized = result; }
+	}
+	for x: 0..grid[0].count-1 {
+		result := run_simulation(.{.{x,-1},.DOWN});
+		if result > part2_max_energized { part2_max_energized = result; }
+		result = run_simulation(.{.{x,grid.count},.UP});
+		if result > part2_max_energized { part2_max_energized = result; }
+	}
+
+	return part1_energized, part2_max_energized;
 }
