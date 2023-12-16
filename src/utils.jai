@@ -24,6 +24,10 @@ Point :: struct {
 operator + :: (a: Point, b: Point) -> Point {
 	return Point.{a.x+b.x,a.y+b.y};
 }
+operator += :: (self: *Point, other: Point) {
+	self.x += other.x;
+	self.y += other.y;
+}
 operator == :: (a: Point, b: Point) -> bool {
 	return a.x == b.x && a.y == b.y;
 }
