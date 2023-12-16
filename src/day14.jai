@@ -33,11 +33,9 @@ hash_grid :: () -> u32 {
 	return hash;
 }
 
-seen_states: Table(u32, int);
 run_main :: (suffix := "") -> int {
 	
 	array_reset(*grid);
-	table_reset(*seen_states);
 
 	process_line :: (line: string) {
 		row: [..]Tile;
@@ -53,6 +51,7 @@ run_main :: (suffix := "") -> int {
 	}
 	process_file("day14", process_line, suffix);
 
+	seen_states: Table(u32, int);
 	iter_target :: 1000000000;
 	iter := 0;
 	found_cycle := false;
