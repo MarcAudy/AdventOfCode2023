@@ -10,10 +10,10 @@
 run :: () {
 	sample_part1, sample_part2 := run_main("sample");
 	part1, part2               := run_main();
-	print("Day15 Part1 Sample: %\n", sample_part1);
-	print("Day15 Part1       : %\n", part1);
-	print("Day15 Part2 Sample: %\n", sample_part2);
-	print("Day15 Part2       : %\n", part2);
+	print("Day16 Part1 Sample: %\n", sample_part1);
+	print("Day16 Part1       : %\n", part1);
+	print("Day16 Part2 Sample: %\n", sample_part2);
+	print("Day16 Part2       : %\n", part2);
 }
 
 Tile :: enum {
