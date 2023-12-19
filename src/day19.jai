@@ -7,14 +7,13 @@
 #import "String";
 #import "utils";
 
-part: Parts;
 run :: () {
-	part = .PART1;
-	print("Day19 Part1 Sample : %\n", run_main("sample"));
-	print("Day19 Part1        : %\n", run_main());
-	part = .PART2;
-	//print("Day19 Part2 Sample : %\n", run_main("sample"));
-	//print("Day19 Part2        : %\n", run_main());
+	sample_part1, sample_part2 := run_main("sample");
+	part1, part2               := run_main();
+	print("Day19 Part1 Sample: %\n", sample_part1);
+	print("Day19 Part1       : %\n", part1);
+	print("Day19 Part2 Sample: %\n", sample_part2);
+	print("Day19 Part2       : %\n", part2);
 }
 
 RatingType :: enum {
@@ -61,8 +60,12 @@ evaluate_rule :: (r: Rule, pr: PartRating) -> EvaluateRuleResult {
 	}
 }
 
+PartRange :: struct {
+	min: [4]int;
+	max: [4]int;
+}
+
 Workflow :: struct {
-	ID: string;
 	rules: [..]Rule;
 }
 
@@ -71,7 +74,7 @@ PartRating :: [4]int;
 workflows: Table(string,Workflow);
 part_ratings: [..]PartRating;
 reading_workflows: bool;
-run_main :: (suffix := "") -> int {
+run_main :: (suffix := "") -> int, int {
 	
 	table_reset(*workflows);
 	array_reset(*part_ratings);
@@ -83,7 +86,7 @@ run_main :: (suffix := "") -> int {
 		else if (reading_workflows) {
 			workflow: Workflow;
 			open_bracket_index := find_index_from_left(line,"{");
-			workflow.ID = copy_string(slice(line,0,open_bracket_index));
+			ID := copy_string(slice(line,0,open_bracket_index));
 			rules := split(slice(line,open_bracket_index+1,line.count-open_bracket_index-2),",");
 			for rules {
 				rule: Rule;
@@ -107,7 +110,7 @@ run_main :: (suffix := "") -> int {
 				}
 				array_add(*workflow.rules,rule);
 			}
-			table_set(*workflows,workflow.ID,workflow);
+			table_set(*workflows,ID,workflow);
 		}
 		else {
 			ratings := split(slice(line,1,line.count-2),",");
@@ -123,7 +126,7 @@ run_main :: (suffix := "") -> int {
 	}
 	process_file("day19", process_line, suffix);
 
-	sum := 0;
+	part1 := 0;
 
 	for pr: part_ratings {
 		workflow := table_find_pointer(*workflows, "in");
@@ -132,7 +135,7 @@ run_main :: (suffix := "") -> int {
 				if evaluate_rule(rule, pr) == {
 					case .ACCEPT;
 						for pr {
-							sum += it;
+							part1 += it;
 						}
 						continue pr;
 					case .REJECT; 
@@ -145,5 +148,49 @@ run_main :: (suffix := "") -> int {
 		}
 	}
 
-	return sum;
+
+	determine_accepted :: (range: PartRange, workflow_id: string) -> int {
+		if workflow_id == "A" {
+			result := 1;
+			for 0..3 {
+				result *= range.max[it]-range.min[it]+1;
+			}
+			return result;
+		}
+		else if workflow_id == "R" {
+			return 0;
+		}
+
+		workflow := table_find_pointer(*workflows, workflow_id);
+
+		result := 0;
+		remaining_range := range;
+		for rule: workflow.rules {
+			if rule.rating_type == .ELSE {
+				result += determine_accepted(remaining_range, rule.next_workflow);
+			}
+			else {
+				new_range := remaining_range;
+				if rule.less_than {
+					if new_range.max[rule.rating_type] >= rule.value {
+						new_range.max[rule.rating_type] = rule.value - 1;
+						remaining_range.min[rule.rating_type] = rule.value;
+					}
+				}
+				else {
+					if new_range.min[rule.rating_type] <= rule.value {
+						new_range.min[rule.rating_type] = rule.value + 1;
+						remaining_range.max[rule.rating_type] = rule.value;
+					}
+				}
+				result += determine_accepted(new_range, rule.next_workflow);
+			}
+		}
+
+		return result;
+	}
+
+	part2 := determine_accepted(.{.[1,1,1,1],.[4000,4000,4000,4000]}, "in");
+
+	return part1, part2;
 }
