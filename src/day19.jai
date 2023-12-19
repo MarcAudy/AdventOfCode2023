@@ -65,10 +65,7 @@ PartRange :: struct {
 	max: [4]int;
 }
 
-Workflow :: struct {
-	rules: [..]Rule;
-}
-
+Workflow :: [..]Rule;
 PartRating :: [4]int;
 
 workflows: Table(string,Workflow);
@@ -108,7 +105,7 @@ run_main :: (suffix := "") -> int, int {
 					rule.rating_type = .ELSE;
 					rule.next_workflow = copy_string(it);
 				}
-				array_add(*workflow.rules,rule);
+				array_add(*workflow,rule);
 			}
 			table_set(*workflows,ID,workflow);
 		}
@@ -131,7 +128,7 @@ run_main :: (suffix := "") -> int, int {
 	for pr: part_ratings {
 		workflow := table_find_pointer(*workflows, "in");
 		while true {
-			for rule: workflow.rules {
+			for rule: <<workflow {
 				if evaluate_rule(rule, pr) == {
 					case .ACCEPT;
 						for pr {
@@ -165,7 +162,7 @@ run_main :: (suffix := "") -> int, int {
 
 		result := 0;
 		remaining_range := range;
-		for rule: workflow.rules {
+		for rule: <<workflow {
 			if rule.rating_type == .ELSE {
 				result += determine_accepted(remaining_range, rule.next_workflow);
 			}
