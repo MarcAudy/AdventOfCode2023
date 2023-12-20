@@ -81,28 +81,5 @@ run_main :: (suffix := "") -> int {
 		}
 	}
 
-	get_gcd :: (a_in: int, b_in: int) -> int {
-		a := a_in;
-		b := b_in;
-		while true {
-			r := a % b;
-			if r == 0 return b;
-			a = b;
-			b = r;
-		}
-		assert(false);
-		return 0;
-	}
-
-	quick_sort(found_z_steps, (a,b) => b-a);
-
-	first_num := found_z_steps[0];
-	for 1..found_z_steps.count-1 {
-		second_num := found_z_steps[it];
-		gcd := get_gcd(first_num, second_num);
-		lcm := (first_num * second_num) / gcd;
-		first_num = lcm;
-	}
-
-	return first_num;
+	return get_least_common_multiple(found_z_steps);
 }

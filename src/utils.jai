@@ -41,6 +41,29 @@ dist_between :: (p1: Point, p2: Point) -> int {
 	return abs(p1.x-p2.x) + abs(p1.y-p2.y);
 }
 
+get_greatest_common_demoninator :: (a_in: int, b_in: int) -> int {
+	a := a_in;
+	b := b_in;
+	while true {
+		r := a % b;
+		if r == 0 return b;
+		a = b;
+		b = r;
+	}
+	assert(false);
+	return 0;
+}
+
+get_least_common_multiple :: (values: []int) -> int {
+	first_num := values[0];
+	for 1..values.count-1 {
+		second_num := values[it];
+		gcd := get_greatest_common_demoninator(first_num, second_num);
+		lcm := (first_num * second_num) / gcd;
+		first_num = lcm;
+	}
+	return first_num;
+}
 
 get_input_file_handler :: (day: string, suffix := "") -> Text_File_Handler
 {

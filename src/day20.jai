@@ -14,9 +14,7 @@ run :: () {
 	print("Day20 Part1 Sample2: %\n", run_main("sample2"));
 	print("Day20 Part1        : %\n", run_main());
 	part = .PART2;
-	//print("Day20 Part2 Sample : %\n", run_main("sample"));
-	//print("Day20 Part2 Sample2: %\n", run_main("sample2"));
-	//print("Day20 Part2        : %\n", run_main());
+	print("Day20 Part2        : %\n", run_main());
 }
 
 ModuleType :: enum {
@@ -79,7 +77,15 @@ run_main :: (suffix := "") -> int {
 		dest: string;
 	}
 
-	for 1..1000 {
+	// Part 2 might be completely generalizable but we'll hardcode some logic here based on our data
+	// rx's input is tj and tj is a multiple conjunction, we need to identify when tj
+	// will push a low signal to rx, which is when all of its inputs are high
+	// this can be calculated as the LCM of the first time they are each high
+	tj_module := table_find_pointer(*modules, "tj");
+	tj_inputs_high: Table(string, int);
+
+	button_press := 1;
+	while true {
 		pulses: [..]Pulse;
 		array_add(*pulses,.{false,"button","broadcaster"});
 		pulse_index := 0;
@@ -89,7 +95,6 @@ run_main :: (suffix := "") -> int {
 			pulse := pulses[pulse_index];
 			module := table_find_pointer(*modules, pulse.dest);
 
-			//print("% -%-> %\n",pulse.source,ifx pulse.high_pulse "high" else "low",pulse.dest);
 			if pulse.high_pulse {
 				high_count += 1;
 			}
@@ -111,11 +116,26 @@ run_main :: (suffix := "") -> int {
 							}
 						}
 					case .CONJUNCTION;
-						//print_table(*module.inputs);
 						<<table_find_pointer(*module.inputs,pulse.source) = pulse.high_pulse;
 						output := false;
-						for module.inputs {
-							if it == false {
+						for high, module_name: module.inputs {
+							if part == .PART2 && module == tj_module {
+								if high {
+									value, new := find_or_add(*tj_inputs_high,module_name);
+									if new {
+										<<value = button_press;
+										if tj_inputs_high.count == module.inputs.count {										
+											inputs_enabled: [..]int;
+											for tj_inputs_high array_add(*inputs_enabled,it);
+											return get_least_common_multiple(inputs_enabled);
+										}
+									}
+								}
+								else {
+									output = true;
+								}
+							}
+							else if !high {
 								output = true;
 								break;
 							}
@@ -124,11 +144,15 @@ run_main :: (suffix := "") -> int {
 							array_add(*pulses,.{output,pulse.dest,it});
 						}				
 				}
-				//print("%\n",array_view(pulses,pulse_index+1,pulses.count-pulse_index+1));
 			}
 		}
-		//print("% %\n",low_count,high_count);
+		button_press += 1;
+		if (part == .PART1) {
+			if button_press == 1000 {
+				return low_count * high_count;
+			}
+		}
 	}
 	
-	return low_count * high_count;
+	return 0;
 }
