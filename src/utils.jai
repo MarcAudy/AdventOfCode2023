@@ -11,11 +11,18 @@ Parts :: enum u8 {
 	PART2;
 }
 
-print_table :: (table: Table) {
-	for v, n: table {
-		print("%: %\n",n,v);
-	}
+print_table :: (table: Table, separator := "\n") {
+	print("%\n",sprint_table(table,separator));
 }
+
+sprint_table :: (table: Table, separator := "\n") -> string {
+	result: string;
+	for v, n: table {
+		result = sprint("%1%2: %3%4",result,n,v,separator);
+	}
+	return result;
+}
+
 
 Point :: struct {
 	x: int;
