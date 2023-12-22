@@ -7,14 +7,13 @@
 #import "String";
 #import "utils";
 
-part: Parts;
 run :: () {
-	part = .PART1;
-	print("Day22 Part1 Sample : %\n", run_main("sample"));
-	print("Day22 Part1        : %\n", run_main());
-	part = .PART2;
-	//print("Day22 Part2 Sample : %\n", run_main("sample"));
-	//print("Day22 Part2        : %\n", run_main());
+	sample_part1, sample_part2 := run_main("sample");
+	part1, part2               := run_main();
+	print("Day22 Part1 Sample: %\n", sample_part1);
+	print("Day22 Part1       : %\n", part1);
+	print("Day22 Part2 Sample: %\n", sample_part2);
+	print("Day22 Part2       : %\n",part2);
 }
 
 x :: 0;
@@ -40,10 +39,39 @@ debug_cubes :: (cubes: []*BrickCube) {
 	print("\n");
 }
 
+get_dependents :: (cube: *BrickCube) -> int {
+	destroyed: Table(*BrickCube,bool);
+	table_set(*destroyed,cube,true);
+	
+	to_consider: [..]*BrickCube;
+	array_add(*to_consider,cube);
+
+	consider_index := 0;
+
+	while consider_index < to_consider.count {
+		defer consider_index += 1;
+		considering := to_consider[consider_index];
+
+		for _, supported: considering.supporting {
+			for _, resting_on: supported.resting_on {
+				if !table_contains(*destroyed,resting_on) {
+					continue supported;
+				}
+			}
+			_, new := find_or_add(*destroyed,supported);
+			if new {
+				array_add(*to_consider,supported);
+			}
+		}
+	}
+	
+	return destroyed.count-1;
+}
+
 cubes: [..]*BrickCube;
 cubes_by_top: Table(int, [..]*BrickCube);
 cubes_at_rest_count: int;
-run_main :: (suffix := "") -> int {
+run_main :: (suffix := "") -> int, int {
 	
 	array_reset(*cubes);
 	table_reset(*cubes_by_top);
@@ -129,15 +157,17 @@ run_main :: (suffix := "") -> int {
 		}		
 	}
 
-	destroyable := 0;
+	part1 := 0;
+	part2 := 0;
 	for cube: cubes {
 		for _, supported: cube.supporting {
 			if supported.resting_on.count == 1 {
+				part2 += get_dependents(cube);
 				continue cube;
 			}
 		}
-		destroyable += 1;
+		part1 += 1;
 	}
 
-	return destroyable;
+	return part1, part2;
 }
