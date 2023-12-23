@@ -22,8 +22,9 @@ Day18 :: #import "day18";
 Day19 :: #import "day19";
 Day20 :: #import "day20";
 Day21 :: #import "day21";
-*/
 Day22 :: #import "day22";
+*/
+Day23 :: #import "day23";
 
 main ::() {
 
@@ -56,6 +57,7 @@ main ::() {
 	Day19.run();
 	Day20.run();
 	Day21.run();
-	*/
 	Day22.run();
+	*/
+	Day23.run();
 }
