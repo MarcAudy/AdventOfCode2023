@@ -11,18 +11,32 @@ Parts :: enum u8 {
 	PART2;
 }
 
-print_table :: (table: Table, separator := "\n") {
-	print("%\n",sprint_table(table,separator));
+default_table_formatter :: (n: Any, v: Any) -> string {
+	return tprint("%: %",n,v);
 }
 
-sprint_table :: (table: Table, separator := "\n") -> string {
+print_table :: (table: Table, separator := "\n", formatter := default_table_formatter) {
+	print("%\n",sprint_table(table,separator,formatter));
+}
+
+sprint_table :: (table: Table, separator := "\n", formatter := default_table_formatter) -> string {
 	result: string;
 	for v, n: table {
-		result = sprint("%1%2: %3%4",result,n,v,separator);
+		result = sprint("%1%2%3",result,formatter(n,v),separator);
 	}
 	return result;
 }
 
+table_intersection :: (a: Table, b: Table(a.Key_Type, a.Value_Type)) -> Table(a.Key_Type, a.Value_Type) {
+	result: Table(a.Key_Type, a.Value_Type);
+	for v, n: a {
+		if table_contains(*b, n) {
+			table_set(*result,n,v);
+		}
+	}
+		
+	return result;
+}
 
 Point :: struct {
 	x: int;
@@ -107,6 +121,14 @@ process_file :: (day: string, func: (string), suffix := "") {
 
 		func(line);
 	}	
+}
+
+map :: (array: [] $T, f: (T) -> $S) -> [..] S {
+	results: [..] S;
+
+	for array array_add(*results, f(it));
+
+	return results;
 }
 
 find_in_string :: (str: string, to_find: string, reverse := false) -> int {
